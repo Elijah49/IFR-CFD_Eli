@@ -1,6 +1,11 @@
 {
-  "stepFile": "C:\\Users\\mach9\\Documents\\parametric_diff_shallow_carlow.stp",
+  "stepFile": "C:\\Users\\mach9\\Documents\\IFR_AERO_CAR_v2.stp",
   "partName": "FormulaStudentCar",
+  "domain": {
+    "type": "half",
+    "minCorner": [-6.0, -3.0, 0.0],
+    "maxCorner": [12.0, 0.0, 3.0]
+  },
   "globalParams": {
     "velocityMagnitude": 15,
     "velocityDirection": [1, 0, 0],
@@ -15,15 +20,34 @@
     },
     "volumeSetup": {
       "db1": {
-        "minCorner": [-2.0, -0.5, 0.0],
-        "maxCorner": [0.3, 0.0, 0.4],
+        "minCorner": [-0.5, -0.6, 0.0],
+        "maxCorner": [2.0, 0.0, 0.5],
         "size": [0.005, 0.003, 0.003]
+      },
+      "db2": {
+        "minCorner": [-0.6, -0.7, 0.0],
+        "maxCorner": [3.0, 0.0, 0.8],
+        "size": [0.015, 0.01, 0.01]
       }
     },
     "surfaceSetup": {
+      "L100": {
+        "size": [0.01, 0.005],
+        "pl": [5, 0.01],
+        "curv": 90,
+        "prox": 3.0,
+        "growth": 1.1
+      },
       "L101": {
         "size": [0.01, 0.005],
-        "pl": [5, 0.02],
+        "pl": [5, 0.01],
+        "curv": 90,
+        "prox": 3.0,
+        "growth": 1.1
+      },
+      "L20": {
+        "size": [0.01, 0.005],
+        "pl": [5, 0.01],
         "curv": 90,
         "prox": 3.0,
         "growth": 1.1

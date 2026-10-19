@@ -68,8 +68,9 @@ public class gridding extends StarMacro {
     }
 
     private AutoMeshOperation create_operation(Simulation simulation, String partName) {
-        SolidModelPart solidModelPart_0 = ((SolidModelPart) simulation.get(SimulationPartManager.class).getPart(partName));
-        AutoMeshOperation autoMeshOperation_0 = simulation.get(MeshOperationManager.class).createAutoMeshOperation(new StringVector(new String[] {"star.resurfacer.ResurfacerAutoMesher", "star.trimmer.TrimmerAutoMesher", "star.prismmesher.PrismAutoMesher"}), new NeoObjectVector(new Object[] {solidModelPart_0}));
+        // partName is the subtract output (fluid domain) from create_domain.java
+        GeometryPart domainPart_0 = simulation.get(SimulationPartManager.class).getPart(partName);
+        AutoMeshOperation autoMeshOperation_0 = simulation.get(MeshOperationManager.class).createAutoMeshOperation(new StringVector(new String[] {"star.resurfacer.ResurfacerAutoMesher", "star.trimmer.TrimmerAutoMesher", "star.prismmesher.PrismAutoMesher"}), new NeoObjectVector(new Object[] {domainPart_0}));
         autoMeshOperation_0.getMesherParallelModeOption().setSelected(MesherParallelModeOption.Type.PARALLEL);
 
         return autoMeshOperation_0;
@@ -142,8 +143,7 @@ public class gridding extends StarMacro {
     }
 
     private void create_surface_controls(Simulation simulation, AutoMeshOperation meshOp, JsonObject surfaceSetup, String partName) {
-        SolidModelPart solidModelPart =
-            (SolidModelPart) simulation.get(SimulationPartManager.class).getPart(partName);
+        GeometryPart domainPart = simulation.get(SimulationPartManager.class).getPart(partName);
         Units lengthUnits = (Units) simulation.getUnitsManager().getObject("m");
         Units dimensionlessUnits = (Units) simulation.getUnitsManager().getObject("");
 
@@ -156,9 +156,7 @@ public class gridding extends StarMacro {
                 meshOp.getCustomMeshControls().createSurfaceControl();
             surfaceControl.getGeometryObjects().setQuery(null);
 
-            PartSurface partSurface =
-                (PartSurface) solidModelPart.getPartSurfaceManager().getPartSurface(layerName);
-            surfaceControl.getGeometryObjects().setObjects(partSurface);
+            surfaceControl.getGeometryObjects().setObjects(find_surfaces(domainPart, layerName));
             surfaceControl.setPresentationName(layerName);
 
             surfaceControl.getCustomConditions().get(PartsTargetSurfaceSizeOption.class)
@@ -224,6 +222,22 @@ public class gridding extends StarMacro {
 
             simulation.println("(II) Created surface control: " + layerName);
         }
+    }
+
+    private List<PartSurface> find_surfaces(GeometryPart part, String layer) {
+        // Subtract output prefixes surface names (e.g. "Wing.L101") and a layer can
+        // appear on several car bodies, so collect every surface matching on suffix
+        List<PartSurface> surfaces = new ArrayList<>();
+        for (PartSurface surface : part.getPartSurfaces()) {
+            String name = surface.getPresentationName();
+            if (name.equals(layer) || name.endsWith("." + layer)) {
+                surfaces.add(surface);
+            }
+        }
+        if (surfaces.isEmpty()) {
+            throw new IllegalStateException("No surfaces found for layer " + layer + " on part " + part.getPresentationName());
+        }
+        return surfaces;
     }
     
 }
